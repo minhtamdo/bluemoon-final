@@ -1,0 +1,2858 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý cư dân chung cư</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(255,255,255,0.05) 10px,
+                rgba(255,255,255,0.05) 20px
+            );
+            animation: shimmer 20s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-50%) translateY(-50%) rotate(0deg); }
+            100% { transform: translateX(-50%) translateY(-50%) rotate(360deg); }
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 3px solid #dee2e6;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            background: #f8f9fa;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            color: #6c757d;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-tab::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-tab:hover {
+            color: #495057;
+            background: #e9ecef;
+        }
+
+        .nav-tab.active {
+            color: #667eea;
+            background: white;
+        }
+
+        .nav-tab.active::before {
+            width: 100%;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 30px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-title {
+            font-size: 24px;
+            margin-bottom: 25px;
+            color: #2c3e50;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+            display: inline-block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            transition: all 0.6s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545, #e83e8c);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107, #fd7e14);
+            color: white;
+        }
+
+        .table-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            overflow: hidden;
+            /* box-shadow: 0 5px 15px rgba(0,0,0,0.1); */
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            /* margin: 0 auto;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2); */
+            margin-top: 20px;
+        }
+
+        h2 {
+            color: #2d3748;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .activity-table {
+            width: 100%;
+            border-collapse: separate;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            background: white;
+        }
+
+        .activity-table thead {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .activity-table th {
+            padding: 1.25rem 1.5rem;
+            text-align: left;
+            font-weight: 600;
+            color: white;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .activity-table tbody tr {
+            transition: all 0.3s ease;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .activity-table tbody tr:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .activity-table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        .activity-table td {
+            padding: 1.25rem 1.5rem;
+            color: #4a5568;
+            font-size: 0.95rem;
+            vertical-align: middle;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-success {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+        }
+
+        .status-warning {
+            background: linear-gradient(135deg, #ed8936, #dd6b20);
+            color: white;
+        }
+
+        .status-error {
+            background: linear-gradient(135deg, #f56565, #e53e3e);
+            color: white;
+        }
+
+        .status-info {
+            background: linear-gradient(135deg, #4299e1, #3182ce);
+            color: white;
+        }
+
+        .loading-container {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        .loading-text {
+            color: #718096;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .time-cell {
+            font-weight: 500;
+            color: #2d3748;
+        }
+
+        .activity-cell {
+            font-weight: 500;
+        }
+
+        .activity-icon {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 0.75rem;
+        }
+
+        .icon-login { background: #48bb78; }
+        .icon-update { background: #4299e1; }
+        .icon-delete { background: #f56565; }
+        .icon-create { background: #38b2ac; }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .table-container {
+                padding: 1.5rem;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+            }
+            
+            .activity-table th,
+            .activity-table td {
+                padding: 1rem;
+                font-size: 0.9rem;
+            }
+            
+            .status-badge {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 15px 12px;
+            border-bottom: 1px solid #dee2e6;
+            transition: background-color 0.3s ease;
+        }
+
+        tr:hover td {
+            background-color: #f8f9fa;
+        }
+
+        .status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-approved {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .close {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #adb5bd;
+            transition: color 0.3s ease;
+        }
+
+        .close:hover {
+            color: #495057;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover::before {
+            transform: scale(1.5);
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .search-box {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .search-box input {
+            padding-left: 45px;
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+        }
+
+        .search-box::before {
+            content: '🔍';
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+        }
+
+        .member-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .member-card:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .member-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .member-details {
+            flex: 1;
+        }
+
+        .member-name {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .member-meta {
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .member-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .nav-tabs {
+                flex-direction: column;
+            }
+
+            .tab-content {
+                padding: 20px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 14px;
+            }
+
+            th, td {
+                padding: 10px 8px;
+            }
+        }
+        
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .close-modal:hover {
+            color: #000;
+        }
+
+        .request-detail h3 {
+            margin-bottom: 20px;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .detail-item {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .detail-item strong {
+            color: #333;
+            min-width: 120px;
+            display: inline-block;
+        }
+
+        .status-approved {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-rejected {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+            /* Sub tabs styles */
+        .sub-tabs {
+            display: flex;
+            border-bottom: 2px solid #e0e0e0;
+            margin-bottom: 20px;
+            gap: 0;
+        }
+
+        .sub-tab-btn {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .sub-tab-btn:hover {
+            color: #2196f3;
+            background-color: #f5f5f5;
+        }
+
+        .sub-tab-btn.active {
+            color: #2196f3;
+            border-bottom-color: #2196f3;
+            background-color: #f8f9fa;
+        }
+
+        .badge {
+            display: inline-block;
+            background-color: #f44336;
+            color: white;
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 8px;
+            min-width: 18px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .sub-tab-content {
+            display: none;
+        }
+
+        .sub-tab-content.active {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sub-tabs {
+                flex-direction: column;
+            }
+            
+            .sub-tab-btn {
+                text-align: center;
+                border-bottom: 1px solid #e0e0e0;
+            }
+            
+            .sub-tab-btn.active {
+                border-bottom-color: #2196f3;
+            }
+        }
+
+        .statistics-dashboard {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .stats-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stats-header h3 {
+            margin: 0 0 8px 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .stats-header p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        .stats-controls {
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            text-align: center;
+        }
+
+        .select-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .stats-select {
+            appearance: none;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 10px 35px 10px 12px;
+            font-size: 0.95rem;
+            color: #495057;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 180px;
+        }
+
+        .stats-select:hover {
+            border-color: #667eea;
+        }
+
+        .stats-select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .select-wrapper::after {
+            content: '▼';
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            pointer-events: none;
+            font-size: 0.8rem;
+        }
+
+        .stats-content {
+            display: flex;
+            gap: 30px;
+            padding: 25px;
+        }
+
+        .stats-info {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .stats-info h4 {
+            color: #343a40;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stats-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .stat-item {
+            background: #f8f9fa;
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            border-left: 3px solid #667eea;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-item:hover {
+            background: #e9ecef;
+            transform: translateX(2px);
+        }
+
+        /* .stat-label {
+            font-weight: 500;
+            color: #495057;
+        } */
+
+        .stat-value {
+            color: #667eea;
+            font-weight: 700;
+        }
+
+        .stats-chart {
+            flex: 2;
+            position: relative;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            background: #fafafa;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+
+        .loading-spinner.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .stats-content {
+                flex-direction: column;
+                gap: 20px;
+                padding: 20px;
+            }
+            
+            .chart-container {
+                height: 250px;
+            }
+        }
+        .logout-link {
+            color: white;
+            margin-left: 5px;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .logout-link:hover {
+            color: black; /* Khi di chuột vào sẽ đổi thành đen */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Hệ thống quản lý cư dân</h1>
+            <p>Chung cư Blue Moon</p>
+            <span>👤Xin chào {{ fullname }}</span>
+                <span>|</span>
+                <a href="{% url 'logout' %}" class="logout-link" onclick="return confirmLogout()">🚪 Đăng xuất</a>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('dashboard')">Tổng quan</button>
+            <button class="nav-tab" onclick="showTab('households')">Quản lý hộ khẩu</button>
+            <button class="nav-tab" onclick="showTab('residents')">Quản lý nhân khẩu</button>
+            <button class="nav-tab" onclick="showTab('requests')">Xét duyệt yêu cầu</button>
+        </div>
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <h2 class="section-title">Tổng quan hệ thống</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalHouseholds">{{ total_households }}</div>
+                    <div class="stat-label">Tổng số hộ khẩu</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalResidents">{{ total_residents }}</div>
+                    <div class="stat-label">Tổng số nhân khẩu</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="pendingRequests">{{ total_pending }}</div>
+                    <div class="stat-label">Yêu cầu chờ duyệt</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="apartmentOccupancy">{{ total }}</div>
+                    <div class="stat-label">Cư dân hiện tại</div>
+                </div>
+            </div>
+
+            <div class="table-container-activity">
+                <h2>Hoạt động gần đây</h2>
+                <table class="activity-table">
+                    <thead>
+                        <tr>
+                            <th>Thời gian</th>
+                            <th>Hoạt động</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recentActivities">
+                        <tr>
+                            <td colspan="3">
+                                <div class="loading-container">
+                                    <div class="loading-spinner"></div>
+                                    <div class="loading-text">Đang tải dữ liệu...</div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+     
+            <div class="stats-header">
+                <h3>📊 Thống kê dữ liệu</h3>
+            </div>
+
+            <div class="stats-controls">
+                <div class="select-wrapper">
+                    <select id="stat-type" class="stats-select">
+                        <option value="gender">👥 Giới tính</option>
+                        <option value="age">🎂 Độ tuổi</option>
+                        <option value="joined">📅 Thời gian tham gia</option>
+                        <option value="residence">🏠 Tạm trú / Thường trú</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="stats-content">
+                <div class="stats-info">
+                    <h4>📋 Chi tiết</h4>
+                    <div class="loading-spinner" id="loading-info">
+                        <div class="spinner"></div>
+                        <p>Đang tải...</p>
+                    </div>
+                    <ul class="stats-list" id="stat-details"></ul>
+                </div>
+
+                <div class="stats-chart">
+                    <div class="loading-spinner" id="loading-chart">
+                        <div class="spinner"></div>
+                        <p>Đang tải biểu đồ...</p>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="stat-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+        <!-- Households Tab -->
+        <div id="households" class="tab-content">
+            <h2 class="section-title">Quản lý hộ khẩu</h2>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div class="search-box" style="flex: 1; margin-right: 20px;">
+                    <input type="text" id="householdSearch" placeholder="Tìm kiếm theo số căn hộ, chủ hộ..." onkeyup="searchHouseholds()">
+                </div>
+                <button class="btn btn-primary" onclick="showAddHouseholdModal()">+ Thêm hộ khẩu</button>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Số căn hộ</th>
+                            <th>Chủ hộ</th>
+                            <th>Số thành viên</th>
+                            <th>Địa chỉ</th>
+                            <th>Ngày đăng ký</th>
+                            <th>Sửa đổi lần cuối</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="householdsTable">
+                        {% for h in households %}
+                            <tr
+                                data-household-id="{{ h.id }}"
+                                data-household-number="{{ h.household_number }}"
+                                data-head-name="{{ h.head.fullname }}"
+                                data-household-size="{{ h.household_size }}"
+                                data-address="{{ h.address }}"
+                                data-created-at="{{ h.created_at|date:'d/m/Y' }}"
+                                data-updated_at="{{ h.updated_at|date:'d/m/Y' }}"
+                            >
+                            <td>{{ h.household_number }}</td>
+                            <td>{{ h.head.fullname }}</td>
+                            <td>{{ h.household_size }}</td>
+                            <td>{{ h.address }}</td>
+                            <td>{{ h.created_at|date:'d/m/Y' }}</td>
+                            <td>{{ h.updated_at|date:'d/m/Y' }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-view" onclick="viewHousehold('{{ h.id }}')">Xem</button>
+                                <button class="btn btn-sm btn-edit" onclick="editHousehold('{{ h.id }}')">Sửa</button>
+                                <button class="btn btn-sm btn-delete" onclick="deleteHousehold('{{ h.id }}')">Xóa</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Residents Tab -->
+        <div id="residents" class="tab-content">
+            <h2 class="section-title">Quản lý nhân khẩu</h2>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div class="search-box" style="flex: 1; margin-right: 20px;">
+                    <input type="text" id="residentSearch" placeholder="Tìm kiếm theo tên, CCCD, số căn hộ..." onkeyup="searchResidents()">
+                </div>
+                <button class="btn btn-primary" onclick="showAddResidentModal()">+ Thêm nhân khẩu</button>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Họ và tên</th>
+                            <th>Giới tính</th>
+                            <th>CCCD</th>
+                            <th>Ngày sinh</th>
+                            <th>Số căn hộ</th>
+                            <th>Quan hệ với chủ hộ</th>
+                            <th>Chi tiết</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="residentsTable">
+                        {% for r in residents %}
+                            <tr
+                                data-member-id="{{ r.id }}"
+                                data-household-number="{{ r.household.household_number }}"
+                                data-full-name="{{ r.full_name }}"
+                                data-gender="{{ r.gender }}"
+                                data-other-name="{{ r.other_name }}"
+                                data-dob="{{ r.dob|date:'d/m/Y' }}"
+                                data-place-of-birth="{{ r.place_of_birth }}"
+                                data-native-place="{{ r.native_place}}"
+                                data-ethnic="{{ r.ethnic_group }}"
+                                data-occupation="{{ r.occupation }}"
+                                data-place-of-work="{{ r.place_of_work}}"
+                                data-cccd="{{ r.cccd }}"
+                                data-issue-date="{{ r.issue_date|date:'d/m/Y' }}"
+                                data-issued-by="{{ r.issued_by}}"
+                                data-relationship="{{ r.relationship }}"
+                                data-is-temporary="{{ r.is_temporary }}"
+                                data-note="{{ r.note }}"
+                                data-joined-at="{{ r.joined_at|date:'d/m/Y' }}"
+                            >
+                            <td>{{ r.full_name }}</td>
+                            <td>
+                                {% if r.gender == 'Male' %}Nam
+                                {% else %}Nữ
+                                {% endif %}
+                            </td>
+                            <td>{{ r.cccd }}</td>
+                            <td>{{ r.dob|date:"d/m/Y" }}</td>
+                            <td>{{ r.household.household_number }}</td>
+                            <td>{{ r.relationship }}</td>
+                            <td><button class="btn btn-sm" onclick="viewResidents('{{ r.id }}')">Xem</button></td>
+                            <td>
+                                <button class="btn btn-sm btn-edit" onclick="editResident('{{ r.id }}')">Sửa</button>
+                                <button class="btn btn-sm btn-delete" onclick="deleteResident('{{ r.id }}')">Xóa</button>
+                            </td>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Requests Tab -->
+        <div id="requests" class="tab-content">
+            <div class="sub-tabs">
+                <button class="sub-tab-btn active" onclick="showSubTab('approve')">
+                    Duyệt yêu cầu
+                    <span class="badge" id="pendingCount">{{ pending_requests|length }}</span>
+                </button>
+                <button class="sub-tab-btn" onclick="showSubTab('view')">
+                    Xem yêu cầu
+                </button>
+            </div>
+
+            <!-- Duyệt yêu cầu tab -->
+            <div id="approve-tab" class="sub-tab-content active">
+            <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+                <select id="approveFilter" onchange="filterApproveRequests()" style="width: auto;">
+                    <option value="all">Tất cả yêu cầu</option>
+                    <option value="Tạm trú">Tạm trú</option>
+                    <option value="Tạm vắng">Tạm vắng</option>
+                </select>
+                <input type="text" id="approveSearch" placeholder="Tìm kiếm theo tên..."
+                    oninput="filterApproveRequests()"
+                    style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; width: 250px;">
+            </div>
+
+            <!-- Bulk actions -->
+            <div id="bulkActions" style="display: none; background: #e3f2fd; padding: 10px 15px; border-radius: 4px; margin-bottom: 15px;">
+                <span>Đã chọn <strong id="selectedCount">0</strong> yêu cầu</span>
+                <button id="bulkApproveBtn" style="background: #4caf50; color: white; border: none; padding: 6px 12px; border-radius: 4px; margin-left: 10px; cursor: pointer;">
+                    Duyệt tất cả
+                </button>
+                <button id="bulkRejectBtn" style="background: #f44336; color: white; border: none; padding: 6px 12px; border-radius: 4px; margin-left: 5px; cursor: pointer;">
+                    Từ chối tất cả
+                </button>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="selectAll" onchange="toggleSelectAll()"></th>
+                            <th>Người yêu cầu</th>
+                            <th>Loại yêu cầu</th>
+                            <th>Từ ngày</th>
+                            <th>Đến ngày</th>
+                            <th>Tạm vắng/ Tạm trú</th>
+                            <th>Lí do</th>
+                            <th>Ngày gửi</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="approveTable">
+                        {% for request in residency_requests %}
+                        {% if request.status == "pending" %}
+                        <tr data-type="{{ request.get_request_type_display }}" data-name="{{ request.user.fullname|lower }}">
+                            <td><input type="checkbox" class="row-checkbox" onchange="updateBulkActions()"></td>
+                            <td><strong>{{ request.user.fullname}}</strong></td>
+                            <td>{{ request.get_request_type_display }}</td>
+                            <td>{{ request.from_date|date:"d/m/Y" }}</td>
+                            <td>{% if request.to_date %}{{ request.to_date|date:"d/m/Y" }}{% else %}--{% endif %}</td>
+                            <td>
+                                {% if request.request_type == "Tạm trú" %}
+                                    {{ request.destination }}
+                                {% else %}
+                                    {{ request.origin }}
+                                {% endif %}
+                            </td>
+                            <td>{{ request.reason }}</td>
+                            <td>{{ request.created_at|date:"d/m/Y" }}</td>
+                            <td>
+                                <button onclick="approveRequest('{{ request.id }}')" 
+                                        style="background: #4caf50; color: white; border: none; padding: 5px 10px; border-radius: 3px; margin-right: 5px; cursor: pointer; font-size: 12px;">
+                                    Duyệt
+                                </button>
+                                <button onclick="rejectRequest('{{ request.id }}')" 
+                                        style="background: #f44336; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-size: 12px;">
+                                    Từ chối
+                                </button>
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            </div>
+
+            <!-- Xem yêu cầu tab -->
+            <div id="view-tab" class="sub-tab-content">
+                <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+                    <select id="viewTypeFilter" onchange="filterRequests()" style="width: auto;">
+                        <option value="all">Tất cả yêu cầu</option>
+                        <option value="temporary_residence">Tạm trú</option>
+                        <option value="temporary_absence">Tạm vắng</option>
+                    </select>
+                    <select id="viewStatusFilter" onchange="filterRequests()" style="width: auto;">
+                        <option value="all">Tất cả trạng thái</option>
+                        <option value="approved">Đã duyệt</option>
+                        <option value="rejected">Đã từ chối</option>
+                    </select>
+                    <input type="text" id="viewSearch" placeholder="Tìm kiếm theo tên..." 
+                        oninput="filterRequests()"
+                        style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; width: 250px;">
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Người yêu cầu</th>
+                                <th>Loại yêu cầu</th>
+                                <th>Ngày gửi</th>
+                                <th>Ngày duyệt</th>
+                                <th>Trạng thái</th>
+                                <th>Chi tiết</th>
+                            </tr>
+                        </thead>
+                        <tbody id="viewTable">
+                            {% for request in residency_requests %}
+                                {% if request.status != "pending" %}
+                                <tr
+                                    data-status="{{ request.status }}"
+                                    data-name="{{ request.user.fullname|lower }}"
+                                    data-request-id="{{ request.id }}"
+                                    data-user-name="{{ request.user.fullname }}"
+                                    data-request-type="{{ request.request_type }}"
+                                    data-from-date="{{ request.from_date|date:'d/m/Y' }}"
+                                    data-to-date="{% if request.to_date %}{{ request.to_date|date:'d/m/Y' }}{% endif %}"
+                                    data-location="{% if request.request_type == 'temporary_residence' %}{{ request.destination }}{% else %}{{ request.origin }}{% endif %}"
+                                    data-reason="{{ request.reason }}"
+                                    data-created-at="{{ request.created_at|date:'d/m/Y H:i' }}"
+                                    data-processed-at="{% if request.updated_at %}{{ request.updated_at|date:'d/m/Y H:i' }}{% endif %}"
+                                    data-processed-by="{% if request.processed_by %}{{ request.processed_by.fullname }}{% endif %}"
+                                >
+                                    
+                                    <td><strong>{{ request.user.fullname }}</strong></td>
+                                    <td>{{ request.get_request_type_display }}</td>
+                                    <td>{{ request.created_at|date:"d/m/Y" }}</td>
+                                    <td>{{ request.updated_at|date:"d/m/Y" }}</td>
+                                    <td>
+                                        {% if request.status == "approved" %}
+                                            <span class="status status-approved">ĐÃ DUYỆT</span>
+                                        {% else %}
+                                            <span class="status status-rejected">TỪ CHỐI</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <button onclick="viewRequests('{{ request.id }}')" 
+                                                style="background: #2196f3; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-size: 12px;">
+                                            Chi tiết
+                                        </button>
+                                    </td>
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Modal -->
+        <div id="householdDetailModal" class="modal-overlay" style="display: none;">
+            <div class="modal-content" onclick="event.stopPropagation();">
+                <span class="close-modal" onclick="closeModal1()">&times;</span>
+                <h3 id="householdOwnerName">Chủ hộ: ...</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Họ tên</th>
+                            <th>Vai trò</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="householdMemberList"></tbody>
+                </table>
+            </div>
+        </div>
+
+    <script>
+        function getCsrfToken() {
+            const cookieValue = document.cookie
+                .split('; ')
+                .find(row => row.startsWith('csrftoken='))
+                ?.split('=')[1];
+            
+            if (cookieValue)
+                return cookieValue;
+            
+            const metaTag = document.querySelector('meta[name="csrf-token"]');
+            if (metaTag)
+                return metaTag.getAttribute('content');
+            
+            const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+            if (csrfInput)
+                return csrfInput.value;
+            
+            console.warn('Không tìm thấy CSRF token!');
+            return '';
+        }
+
+        function updatePendingCount() {
+            const pendingRows = document.querySelectorAll('#approveTable tr');
+            const pendingCount = document.getElementById('pendingCount');
+            if (pendingCount) {
+                pendingCount.textContent = pendingRows.length;
+            }
+        }
+
+        function updateBulkActions() {
+            const checkboxes = document.querySelectorAll('.row-checkbox');
+            const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+            const bulkActions = document.getElementById('bulkActions');
+            const selectedCount = document.getElementById('selectedCount');
+            const selectAll = document.getElementById('selectAll');
+        
+            selectedCount.textContent = checkedBoxes.length;
+        
+            if (checkedBoxes.length > 0)
+                bulkActions.style.display = 'block';
+            else
+                bulkActions.style.display = 'none';
+            
+            if (checkedBoxes.length === 0) {
+                selectAll.indeterminate = false;
+                selectAll.checked = false;
+            } else if (checkedBoxes.length === checkboxes.length) {
+                selectAll.indeterminate = false;
+                selectAll.checked = true;
+            } else {
+                selectAll.indeterminate = true;
+                selectAll.checked = false;
+            }
+        }
+
+        function loadRecentActivities() {
+            const list = document.getElementById('recentActivities');
+            list.innerHTML = `<tr><td colspan="3">Đang tải dữ liệu...</td></tr>`;
+
+            fetch('/recent-activities/')
+                .then(res => {
+                    if (!res.ok) {
+                        throw new Error("Server trả về lỗi");
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    const activities = data.activities || [];
+                    list.innerHTML = '';
+
+                    if (activities.length === 0) {
+                        list.innerHTML = `<tr><td colspan="3">Không có hoạt động nào gần đây.</td></tr>`;
+                        return;
+                    }
+
+                    activities.forEach(act => {
+                        const tr = document.createElement('tr');
+
+                        const tdTime = document.createElement('td');
+                        tdTime.innerText = act.time;
+                        tr.appendChild(tdTime);
+
+                        const tdActivity = document.createElement('td');
+                        tdActivity.innerText = act.activity;
+                        tr.appendChild(tdActivity);
+
+                        const tdStatus = document.createElement('td');
+                        tdStatus.innerText = act.status;
+                        tr.appendChild(tdStatus);
+
+                        list.appendChild(tr);
+                    });
+                })
+                .catch(error => {
+                    console.error("Lỗi khi tải hoạt động:", error);
+                    list.innerHTML = `<tr><td colspan="3" style="color:red;">Không thể tải dữ liệu. Vui lòng thử lại sau.</td></tr>`;
+                });
+        }
+
+        window.addEventListener('DOMContentLoaded', loadRecentActivities);
+
+        function formatDateForInput(dateStr) {
+            if (!dateStr || dateStr.trim() === '') return '';
+
+            const parts = dateStr.split('/');
+            if (parts.length !== 3) return '';
+
+            const [day, month, year] = parts;
+            return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+        }
+
+        function toggleSelectAll() {
+            const selectAll = document.getElementById('selectAll');
+            const checkboxes = document.querySelectorAll('.row-checkbox');
+
+            if (!selectAll) {
+                console.warn('Select all checkbox not found!');
+                return;
+            }
+            
+            if (checkboxes.length === 0) {
+                console.warn('No row checkboxes found!');
+                return;
+            }
+            
+            checkboxes.forEach((checkbox, index) => {
+                checkbox.checked = selectAll.checked;
+            });
+            
+            updateBulkActions();
+        }
+
+
+        async function updateDashboard() {
+            try {
+            const response = await fetch('/api/overview-stats/');
+            if (!response.ok) {
+                console.error('Không thể lấy dữ liệu thống kê:', response.status);
+                return;
+            }
+
+            const data = await response.json();
+
+            // Cập nhật số liệu trên trang
+            document.getElementById('totalHouseholds').textContent = data.total_households;
+            document.getElementById('totalResidents').textContent = data.total_residents;
+            document.getElementById('pendingRequests').textContent = data.total_pending;
+            document.getElementById('apartmentOccupancy').textContent = data.total;
+            } catch (error) {
+            console.error('Lỗi khi cập nhật dashboard:', error);
+            }
+        }
+
+        // Gọi ngay khi trang tải xong
+        document.addEventListener('DOMContentLoaded', updateDashboard);
+
+        // (Tùy chọn) Tự động cập nhật mỗi 10 giây
+        setInterval(updateDashboard, 10000);
+
+        function showTab(tabName) {
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(tab => tab.classList.remove('active'));
+
+            const navTabs = document.querySelectorAll('.nav-tab');
+            navTabs.forEach(tab => tab.classList.remove('active'));
+
+            document.getElementById(tabName).classList.add('active');
+
+            event.target.classList.add('active');
+
+            if (tabName === 'dashboard')
+                updateDashboard();
+        }
+
+        function showSubTab(tabName) {
+            document.querySelectorAll('.sub-tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.sub-tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            if (tabName === 'approve') {
+                document.getElementById('selectAll').checked = false;
+                document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = false);
+                updateBulkActions();
+                updatePendingCount();
+            }
+        }
+
+        function viewRequests(requestId) {
+            const row = document.querySelector(`tr[data-request-id="${requestId}"]`);
+            
+            if (!row) {
+                alert('Không tìm thấy thông tin yêu cầu');
+                return;
+            }
+
+            const userName = row.getAttribute('data-user-name') || '';
+            const requestType = row.getAttribute('data-request-type') || '';
+            const fromDateStr = row.getAttribute('data-from-date') || '';
+            const toDateStr = row.getAttribute('data-to-date') || '';
+            const location = row.getAttribute('data-location') || '';
+            const reason = row.getAttribute('data-reason') || '';
+            const status = row.getAttribute('data-status') || '';
+            const processedAt = row.getAttribute('data-processed-at') || '';
+            const processedBy = row.getAttribute('data-processed-by') || '';
+            const createdAt = row.getAttribute('data-created-at') || '--';
+
+            const statusText = status === 'approved' ? 'ĐÃ DUYỆT' :
+                            status === 'rejected' ? 'TỪ CHỐI' : 'CHỜ DUYỆT';
+            const statusClass = status === 'approved' ? 'status-approved' :
+                                status === 'rejected' ? 'status-rejected' : 'status-pending';
+
+            const modalContent = `
+                <div class="modal-overlay" id="requestModal">
+                    <div class="modal-content" onclick="event.stopPropagation();">
+                        <span class="close-modal" onclick="closeModal()">&times;</span>
+                        <div class="request-detail">
+                            <h3>Chi tiết yêu cầu</h3>
+                            <div class="detail-item"><strong>Loại yêu cầu:</strong> ${requestType}</div>
+                            <div class="detail-item"><strong>Người yêu cầu:</strong> ${userName}</div>
+                            <div class="detail-item"><strong>Thời gian:</strong> ${fromDateStr} – ${toDateStr || '--'}</div>
+                            <div class="detail-item"><strong>Địa điểm:</strong> ${location}</div>
+                            <div class="detail-item"><strong>Lý do:</strong> ${reason}</div>
+                            <div class="detail-item"><strong>Trạng thái:</strong> <span class="${statusClass}">${statusText}</span></div>
+                            <div class="detail-item"><strong>Ngày gửi:</strong> ${createdAt}</div>
+                            <div class="detail-item"><strong>Ngày xử lý:</strong> ${processedAt || '--'}</div>
+                            <div class="detail-item"><strong>Người xử lý:</strong> ${processedBy || '--'}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const existingModal = document.getElementById('requestModal');
+            if (existingModal) existingModal.remove();
+
+            document.body.insertAdjacentHTML('beforeend', modalContent);
+
+            const modalOverlay = document.getElementById('requestModal');
+            modalOverlay.addEventListener('click', closeModal);
+        }
+
+        function showResidentTab(tabName) {
+            const allTabs = document.querySelectorAll('.sub-tab-content');
+            allTabs.forEach(tab => tab.classList.remove('active'));
+            
+            const allBtns = document.querySelectorAll('.sub-tab-btn');
+            allBtns.forEach(btn => btn.classList.remove('active'));
+            
+            const selectedTab = document.getElementById(tabName + '-tab');
+            if (selectedTab)
+                selectedTab.classList.add('active');
+            
+            const clickedBtn = event.target;
+            clickedBtn.classList.add('active');
+        }
+
+        function viewResidents(memberId) {
+            const row = document.querySelector(`tr[data-member-id="${memberId}"]`);
+            
+            if (!row) {
+                alert('Không tìm thấy thông tin nhân khẩu');
+                return;
+            }
+
+            const residentData = {
+                fullName: row.getAttribute('data-full-name') || '--',
+                gender: row.getAttribute('data-gender') || '--',
+                dob: row.getAttribute('data-dob') || '--',
+                otherName: row.getAttribute('data-other-name') || '--',
+                householdNumber: row.getAttribute('data-household-number') || '--',
+                relationship: row.getAttribute('data-relationship') || '--',
+                placeOfBirth: row.getAttribute('data-place-of-birth') || '--',
+                nativePlace: row.getAttribute('data-native-place') || '--',
+                ethnicGroup: row.getAttribute('data-ethnic') || '--',
+                occupation: row.getAttribute('data-occupation') || '--',
+                cccd: row.getAttribute('data-cccd') || '--',
+                placeOfWork: row.getAttribute('data-place-of-work') || '--',
+                issueDate: row.getAttribute('data-issue-date') || '--',
+                issuedBy: row.getAttribute('data-issued-by') || '--',
+                note: row.getAttribute('data-note') || '--',
+                isTemporary: row.getAttribute('data-is-temporary') || '--',
+                joinedAt: row.getAttribute('data-joined-at') || '--'
+            };
+
+            const modalContent = `
+                <div class="modal-overlay" id="residentModal">
+                    <div class="modal-content" onclick="event.stopPropagation();">
+                        <span class="close-modal" onclick="closeModal()">&times;</span>
+                        <h3 style="margin-bottom: 20px; color: #333; border-bottom: 2px solid #667eea; padding-bottom: 10px;">
+                            Thông tin nhân khẩu
+                        </h3>
+
+                        <div class="sub-tabs">
+                            <button class="sub-tab-btn active" onclick="showResidentTab('personal')">Thông tin cá nhân</button>
+                            <button class="sub-tab-btn" onclick="showResidentTab('identity')">Giấy tờ tùy thân</button>
+                            <button class="sub-tab-btn" onclick="showResidentTab('household')">Hộ khẩu</button>
+                            <button class="sub-tab-btn" onclick="showResidentTab('other')">Khác</button>
+                        </div>
+
+                        <div class="sub-tab-content active" id="personal-tab">
+                            <div class="detail-item"><strong>Họ và tên:</strong> ${residentData.fullName}</div>
+                            <div class="detail-item"><strong>Bí danh:</strong> ${residentData.otherName}</div>
+                            <div class="detail-item"><strong>Giới tính:</strong> ${residentData.gender}</div>
+                            <div class="detail-item"><strong>Ngày sinh:</strong> ${residentData.dob}</div>
+                            <div class="detail-item"><strong>Nơi sinh:</strong> ${residentData.placeOfBirth}</div>
+                            <div class="detail-item"><strong>Nguyên quán:</strong> ${residentData.nativePlace}</div>
+                            <div class="detail-item"><strong>Dân tộc:</strong> ${residentData.ethnicGroup}</div>
+                        </div>
+
+                        <div class="sub-tab-content" id="identity-tab">
+                            <div class="detail-item"><strong>Số CCCD:</strong> ${residentData.cccd}</div>
+                            <div class="detail-item"><strong>Ngày cấp:</strong> ${residentData.issueDate}</div>
+                            <div class="detail-item"><strong>Nơi cấp:</strong> ${residentData.issuedBy}</div>
+                        </div>
+
+                        <div class="sub-tab-content" id="household-tab">
+                            <div class="detail-item"><strong>Số hộ khẩu:</strong> ${residentData.householdNumber}</div>
+                            <div class="detail-item"><strong>Quan hệ với chủ hộ:</strong> ${residentData.relationship}</div>
+                            <div class="detail-item"><strong>Ngày nhập hộ khẩu:</strong> ${residentData.joinedAt}</div>
+                            <div class="detail-item"><strong>Trạng thái cư trú:</strong> ${residentData.isTemporary === 'True' ? 'Tạm trú' : 'Thường trú'}</div>
+                        </div>
+
+                        <div class="sub-tab-content" id="other-tab">
+                            <div class="detail-item"><strong>Nghề nghiệp:</strong> ${residentData.occupation}</div>
+                            <div class="detail-item"><strong>Nơi làm việc:</strong> ${residentData.placeOfWork}</div>
+                            <div class="detail-item"><strong>Ghi chú:</strong> ${residentData.note}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const existingModal = document.getElementById('residentModal');
+            if (existingModal) existingModal.remove();
+
+            document.body.insertAdjacentHTML('beforeend', modalContent);
+            
+            const modal = document.getElementById('residentModal');
+            modal.addEventListener('click', closeModal);
+        }
+
+        function filterRequests() {
+            const typeFilter = document.getElementById('viewTypeFilter').value;
+            const statusFilter = document.getElementById('viewStatusFilter').value;
+            const searchValue = document.getElementById('viewSearch').value.toLowerCase();
+            const rows = document.querySelectorAll('#viewTable tr');
+            
+            rows.forEach(row => {
+                const type = row.dataset.requestType || '';
+                const status = row.dataset.status || '';
+                const name = row.dataset.name || '';
+                
+                let showRow = true;
+                
+                if (typeFilter !== 'all' && type !== typeFilter)
+                    showRow = false;
+                
+                if (statusFilter !== 'all' && status !== statusFilter)
+                    showRow = false;
+                
+                if (searchValue && !name.includes(searchValue))
+                    showRow = false;
+                
+                row.style.display = showRow ? '' : 'none';
+            });
+        }
+
+        function filterApproveRequests() {
+            const typeFilter = document.getElementById('approveFilter').value;
+            const searchValue = document.getElementById('approveSearch').value.toLowerCase();
+            
+            const rows = document.querySelectorAll('#approveTable tr');
+            
+            rows.forEach(row => {
+                const typeCell = row.cells[2];
+                const type = typeCell ? typeCell.textContent.trim() : '';
+                const name = row.dataset.name || '';
+                
+                let showRow = true;
+                
+                if (typeFilter !== 'all' && type !== typeFilter)
+                    showRow = false;
+                
+                if (searchValue && !name.includes(searchValue))
+                    showRow = false;
+                
+                row.style.display = showRow ? '' : 'none';
+            });
+        }
+
+        function searchResidents() {
+            const keyword = document.getElementById('residentSearch').value.trim().toLowerCase();
+            const rows = document.querySelectorAll('#residentsTable tr');
+
+            rows.forEach(row => {
+                const fullName = row.getAttribute('data-full-name')?.toLowerCase() || '';
+                const cccd = row.getAttribute('data-cccd')?.toLowerCase() || '';
+                const householdNumber = row.getAttribute('data-household-number')?.toLowerCase() || '';
+
+                const match =
+                    fullName.includes(keyword) ||
+                    cccd.includes(keyword) ||
+                    householdNumber.includes(keyword);
+
+                row.style.display = match ? '' : 'none';
+            });
+        }
+        
+        function searchHouseholds() {
+            const keyword = document.getElementById('householdSearch').value.trim().toLowerCase();
+            const rows = document.querySelectorAll('#householdsTable tr');
+
+            rows.forEach(row => {
+                const headName = row.getAttribute('data-head-name')?.toLowerCase() || '';
+                const householdNumber = row.getAttribute('data-household-number')?.toLowerCase() || '';
+
+                const match =
+                    headName.includes(keyword) ||
+                    householdNumber.includes(keyword);
+
+                row.style.display = match ? '' : 'none';
+            });
+        }
+
+        function editHousehold(householdId) {
+            const row = document.querySelector(`tr[data-household-id="${householdId}"]`);
+            if (!row) {
+                alert('Không tìm thấy thông tin hộ khẩu');
+                return;
+            }
+
+            const data = {
+                householdNumber: row.getAttribute('data-household-number') || '',
+                headName: row.getAttribute('data-head-name') || '',
+                address: row.getAttribute('data-address') || ''
+            };
+
+            const modalContent = `
+                <div class="modal-overlay" id="editHouseholdModal">
+                    <div class="modal-content" onclick="event.stopPropagation();">
+                        <span class="close-modal" onclick="closeModal()">&times;</span>
+                        <h3 style="margin-bottom: 20px; color: #333; border-bottom: 2px solid #667eea; padding-bottom: 10px;">
+                            Chỉnh sửa thông tin hộ khẩu
+                        </h3>
+
+                        <form id="editHouseholdForm">
+                            <div class="form-group">
+                                <label for="edit_household_number">Số căn hộ:</label>
+                                <input type="text" id="edit_household_number" name="household_number" value="${data.householdNumber}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="edit_head_name">Chủ hộ:</label>
+                                <input type="text" id="edit_head_name" name="head_name" value="${data.headName}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="edit_address">Địa chỉ:</label>
+                                <input type="text" id="edit_address" name="address" value="${data.address}" required>
+                            </div>
+
+                            <div style="text-align: right; margin-top: 20px;">
+                                <button type="button" class="btn btn-primary" onclick="submitEditHousehold('${householdId}')">Lưu</button>
+                                <button type="button" class="btn btn-secondary" onclick="closeModal()">Hủy</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+
+            const existingModal = document.getElementById('editHouseholdModal');
+            if (existingModal) existingModal.remove();
+
+            document.body.insertAdjacentHTML('beforeend', modalContent);
+
+            const modal = document.getElementById('editHouseholdModal');
+            modal.addEventListener('click', closeModal);
+        }
+
+        function submitEditHousehold(householdId) {
+            const householdNumber = document.getElementById('edit_household_number').value.trim();
+            const headName = document.getElementById('edit_head_name').value.trim();
+            const address = document.getElementById('edit_address').value.trim();
+
+            fetch(`/editHousehold/${householdId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCsrfToken()
+                },
+                body: new URLSearchParams({
+                    household_number: householdNumber,
+                    head_name: headName,
+                    address: address
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Cập nhật thành công');
+                    closeModal();
+                } else {
+                    alert('Lỗi: ' + JSON.stringify(data.errors || data.message));
+                }
+            })
+            .catch(err => {
+                console.error('Lỗi:', err);
+                alert('Có lỗi xảy ra khi cập nhật');
+            });
+        }
+
+        function deleteHousehold(householdId) {
+            if (!confirm("Bạn có chắc chắn muốn xóa hộ khẩu này?")) return;
+
+            fetch(`/deleteHousehold/${householdId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCsrfToken()
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Xóa hộ khẩu thành công");
+                    const row = document.querySelector(`tr[data-household-id="${householdId}"]`);
+                    if (row) row.remove();
+                } else {
+                    alert("Lỗi khi xóa: " + (data.message || "Không rõ lỗi"));
+                }
+            })
+            .catch(err => {
+                console.error('Lỗi:', err);
+                alert("Có lỗi xảy ra khi xóa hộ khẩu");
+            });
+        }
+
+        function editResident(memberId) {
+            const row = document.querySelector(`tr[data-member-id="${memberId}"]`);
+            if (!row) {
+                alert('Không tìm thấy thông tin nhân khẩu');
+                return;
+            }
+            
+            const data = {
+                fullName: row.getAttribute('data-full-name') || '',
+                gender: row.getAttribute('data-gender') || '',
+                dob: row.getAttribute('data-dob') || '',
+                otherName: row.getAttribute('data-other-name') || '',
+                householdNumber: row.getAttribute('data-household-number') || '',
+                relationship: row.getAttribute('data-relationship') || '',
+                placeOfBirth: row.getAttribute('data-place-of-birth') || '',
+                nativePlace: row.getAttribute('data-native-place') || '',
+                ethnicGroup: row.getAttribute('data-ethnic') || '',
+                occupation: row.getAttribute('data-occupation') || '',
+                cccd: row.getAttribute('data-cccd') || '',
+                placeOfWork: row.getAttribute('data-place-of-work') || '',
+                issueDate: row.getAttribute('data-issue-date') || '',
+                issuedBy: row.getAttribute('data-issued-by') || '',
+                note: row.getAttribute('data-note') || '',
+                isTemporary: row.getAttribute('data-is-temporary') || '',
+                joinedAt: row.getAttribute('data-joined-at') || ''
+            };
+
+            const modalContent = `
+                <div class="modal-overlay" id="editResidentModal">
+                    <div class="modal-content" onclick="event.stopPropagation();">
+                        <span class="close-modal" onclick="closeModal()">&times;</span>
+                        <h3 style="margin-bottom: 20px;">Chỉnh sửa thông tin nhân khẩu</h3>
+
+                        <form id="editResidentForm">
+                            <div class="form-group"><label for="edit_fullname">Họ và tên:</label>
+                                <input type="text" id="edit_fullname" name="full_name" value="${data.fullName}" required>
+                            </div>
+                            <div class="form-group"><label>Giới tính:</label>
+                                <select id="edit_gender" name="gender">
+                                    <option value="Male" ${data.gender === 'Male' ? 'selected' : ''}>Nam</option>
+                                    <option value="Female" ${data.gender === 'Female' ? 'selected' : ''}>Nữ</option>
+                                </select>
+                            </div>
+                            <div class="form-group"><label>Ngày sinh:</label>
+                                <input type="date" id="edit_dob" name="dob" value="${formatDateForInput(data.dob)}">
+                            </div>
+                            <div class="form-group"><label>Tên gọi khác:</label>
+                                <input type="text" id="edit_other_name" name="other_name" value="${data.otherName}">
+                            </div>
+                            <div class="form-group"><label>Số căn hộ:</label>
+                                <input type="text" id="edit_household_number" name="household_number" value="${data.householdNumber}">
+                            </div>
+                            <div class="form-group"><label>Quan hệ với chủ hộ:</label>
+                                <input type="text" id="edit_relationship" name="relationship" value="${data.relationship}">
+                            </div>
+                            <div class="form-group"><label>Nơi sinh:</label>
+                                <input type="text" id="edit_place_of_birth" name="place_of_birth" value="${data.placeOfBirth}">
+                            </div>
+                            <div class="form-group"><label>Quê quán:</label>
+                                <input type="text" id="edit_native_place" name="native_place" value="${data.nativePlace}">
+                            </div>
+                            <div class="form-group"><label>Dân tộc:</label>
+                                <input type="text" id="edit_ethnic" name="ethnic" value="${data.ethnicGroup}">
+                            </div>
+                            <div class="form-group"><label>Nghề nghiệp:</label>
+                                <input type="text" id="edit_occupation" name="occupation" value="${data.occupation}">
+                            </div>
+                            <div class="form-group"><label>CCCD:</label>
+                                <input type="text" id="edit_cccd" name="cccd" value="${data.cccd}">
+                            </div>
+                            <div class="form-group"><label>Nơi làm việc:</label>
+                                <input type="text" id="edit_place_of_work" name="place_of_work" value="${data.placeOfWork}">
+                            </div>
+                            <div class="form-group"><label>Ngày cấp CCCD:</label>
+                                <input type="date" id="edit_issue_date" name="issue_date" value="${formatDateForInput(data.issueDate)}">
+                            </div>
+                            <div class="form-group"><label>Nơi cấp:</label>
+                                <input type="text" id="edit_issued_by" name="issued_by" value="${data.issuedBy}">
+                            </div>
+                            <div class="form-group"><label>Ghi chú:</label>
+                                <input type="text" id="edit_note" name="note" value="${data.note}">
+                            </div>
+                            <div class="form-group"><label>Trạng thái tạm trú:</label>
+                                <select id="edit_is_temporary" name="is_temporary">
+                                    <option value="True" ${(data.isTemporary === 'True') ? 'selected' : ''}>Tạm trú</option>
+                                    <option value="False" ${(data.isTemporary === 'False') ? 'selected' : ''}>Thường trú</option>
+                                </select>
+                            </div>
+                            <div class="form-group"><label>Ngày vào ở:</label>
+                                <input type="date" id="edit_joined_at" name="joined_at" value="${formatDateForInput(data.joinedAt)}">
+                            </div>
+
+                            <div style="text-align: right; margin-top: 20px;">
+                                <button type="button" class="btn btn-primary" onclick="submitEditResident('${memberId}')">Lưu</button>
+                                <button type="button" class="btn btn-secondary" onclick="closeModal()">Hủy</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+
+            const existingModal = document.getElementById('editResidentModal');
+            if (existingModal) existingModal.remove();
+
+            document.body.insertAdjacentHTML('beforeend', modalContent);
+            document.getElementById('editResidentModal').addEventListener('click', closeModal);
+        }
+
+        function submitEditResident(memberId) {
+            const formData = new URLSearchParams({
+                full_name: document.getElementById('edit_fullname').value.trim(),
+                gender: document.getElementById('edit_gender').value,
+                dob: document.getElementById('edit_dob').value,
+                other_name: document.getElementById('edit_other_name').value.trim(),
+                household_number: document.getElementById('edit_household_number').value.trim(),
+                relationship: document.getElementById('edit_relationship').value.trim(),
+                place_of_birth: document.getElementById('edit_place_of_birth').value.trim(),
+                native_place: document.getElementById('edit_native_place').value.trim(),
+                ethnic: document.getElementById('edit_ethnic').value.trim(),
+                occupation: document.getElementById('edit_occupation').value.trim(),
+                cccd: document.getElementById('edit_cccd').value.trim(),
+                place_of_work: document.getElementById('edit_place_of_work').value.trim(),
+                issue_date: document.getElementById('edit_issue_date').value,
+                issued_by: document.getElementById('edit_issued_by').value.trim(),
+                note: document.getElementById('edit_note').value.trim(),
+                is_temporary: document.getElementById('edit_is_temporary').value,
+                joined_at: document.getElementById('edit_joined_at').value
+            });
+
+            fetch(`/editResident/${memberId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCsrfToken()
+                },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Cập nhật nhân khẩu thành công');
+                    closeModal();
+                    // TODO: cập nhật lại dòng dữ liệu trên trang mà không reload
+                } else {
+                    alert('Lỗi: ' + JSON.stringify(data.errors || data.message));
+                }
+            })
+            .catch(err => {
+                console.error('Lỗi:', err);
+                alert('Có lỗi xảy ra khi cập nhật nhân khẩu');
+            });
+        }
+
+        function deleteResident(memberId) {
+            if (!confirm("Bạn có chắc chắn muốn xóa nhân khẩu này?")) return;
+
+            fetch(`/deleteResident/${memberId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCsrfToken()
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Xóa nhân khẩu thành công");
+                    const row = document.querySelector(`tr[data-member-id="${memberId}"]`);
+                    if (row) row.remove();
+                } else {
+                    alert("Lỗi khi xóa: " + (data.message || "Không rõ lỗi"));
+                }
+            })
+            .catch(err => {
+                console.error('Lỗi:', err);
+                alert("Có lỗi xảy ra khi xóa nhân khẩu");
+            });
+        }
+
+        async function showAddHouseholdModal() {
+            const response = await fetch("/users/");
+            const users = await response.json();
+
+            const userOptions = users.map(user =>
+                `<option value="${user.id}">${user.fullname} (${user.username})</option>`
+            ).join("");
+
+            const modalcontent = `
+                <div id="addHouseholdModal" class="modal-overlay">
+                    <div class="modal-content" onclick="event.stopPropagation();">
+                        <div class="modal-header">
+                            <h3>Thêm hộ khẩu mới</h3>
+                            <span class="close-modal" onclick="closeModal()">&times;</span>
+                        </div>
+                        <div class="modal-body">
+                            <form id="addHouseholdForm">
+                                <div class="form-group">
+                                    <label for="householdNumber">Số hộ khẩu *</label>
+                                    <input type="text" id="householdNumber" name="household_number" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="headId">Chủ hộ *</label>
+                                    <select id="headId" name="head_id" required>
+                                        <option value="">-- Chọn chủ hộ --</option>
+                                        ${userOptions}
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="address">Địa chỉ *</label>
+                                    <textarea id="address" name="address" rows="3" required></textarea>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer" style="text-align: right; margin-top: 20px;">
+                            <button type="button" class="btn btn-secondary" onclick="closeModal();">Hủy</button>
+                            <button type="button" class="btn btn-primary" onclick="addHousehold()">Thêm hộ khẩu</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const existingModal = document.getElementById("addHouseholdModal");
+            if (existingModal) existingModal.remove();
+
+            document.body.insertAdjacentHTML("beforeend", modalcontent);
+            document.getElementById("addHouseholdModal").addEventListener("click", closeModal);
+        }
+
+        function addHousehold() {
+            const form = document.getElementById("addHouseholdForm");
+            const data = {
+                household_number: form.household_number.value,
+                head_id: form.head_id.value,
+                address: form.address.value,
+            };
+
+            fetch("/addhouseholds/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => {
+                if (!response.ok) throw new Error("Thêm hộ khẩu thất bại");
+                return response.json();
+            })
+            .then(data => {
+                alert("Đã thêm hộ khẩu thành công!");
+                location.reload();
+            })
+            .catch(error => {
+                alert("Lỗi: " + error.message);
+            });
+        }
+
+        function showAddResidentModal() {
+            const modalContent = `
+                <div id="addResidentModal" class="modal-overlay">
+                    <div class="modal-content" onclick="event.stopPropagation();">
+                        <div class="modal-header">
+                            <h3>Thêm nhân khẩu</h3>
+                            <span class="close-modal" onclick="closeModal()">&times;</span>
+                        </div>
+                        <form id="addResidentForm">
+                            <label>Họ tên *</label>
+                            <input type="text" name="full_name" required>
+
+                            <label>Tên gọi khác</label>
+                            <input type="text" name="other_name">
+
+                            <label>Giới tính *</label>
+                            <select name="gender" required>
+                                <option value="">--Chọn giới tính--</option>
+                                <option value="Male">Nam</option>
+                                <option value="Female">Nữ</option>
+                            </select>
+
+                            <label>Ngày sinh *</label>
+                            <input type="date" name="dob" required>
+
+                            <label>Nơi sinh *</label>
+                            <input type="text" name="place_of_birth" required>
+
+                            <label>Quê quán *</label>
+                            <input type="text" name="native_place" required>
+
+                            <label>Dân tộc *</label>
+                            <input type="text" name="ethnic_group" required>
+
+                            <label>Nghề nghiệp *</label>
+                            <input type="text" name="occupation" required>
+
+                            <label>Nơi làm việc *</label>
+                            <input type="text" name="place_of_work" required>
+
+                            <label>Số CCCD *</label>
+                            <input type="text" name="cccd" required>
+
+                            <label>Ngày cấp CCCD *</label>
+                            <input type="date" name="issue_date" required>
+
+                            <label>Nơi cấp CCCD *</label>
+                            <input type="text" name="issued_by" required>
+
+                            <label>Quan hệ với chủ hộ *</label>
+                            <input type="text" name="relationship" required>
+
+                            <label>Ngày nhập hộ *</label>
+                            <input type="date" name="joined_at" required>
+
+                            <label>Loại cư trú *</label>
+                            <select name="is_temporary" required>
+                                <option value="False">Thường trú</option>
+                                <option value="True">Tạm trú</option>
+                            </select>
+
+                            <label>Ghi chú</label>
+                            <input type="text" name="note">
+
+                            <label>Số hộ khẩu *</label>
+                            <input type="text" name="household_number" required>
+                        </form>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" onclick="closeModal()">Hủy</button>
+                            <button class="btn btn-primary" onclick="addResident()">Thêm</button>
+                        </div>
+                    </div>
+                </div>`;
+            document.body.insertAdjacentHTML('beforeend', modalContent);
+            document.getElementById('addResidentModal').addEventListener('click', closeModal);
+        }
+
+        function addResident() {
+            const form = document.getElementById('addResidentForm');
+            const formData = new FormData(form);
+
+            fetch('/addresident/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': getCsrfToken()
+                }
+            })
+            .then(res => {
+                if (!res.ok) throw new Error('Server error');
+                return res.json();
+            })
+            .then(data => {
+                alert('Thêm nhân khẩu thành công!');
+                closeModal();
+                location.reload();
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                alert('Thêm nhân khẩu thất bại');
+            });
+        }
+
+        function deleteMember(memberId, isOwner) {
+            if (isOwner) {
+                if (!confirm("Xóa chủ hộ sẽ xóa toàn bộ hộ khẩu. Bạn có chắc chắn không?")) return;
+            } else {
+                if (!confirm("Bạn có chắc chắn muốn xóa thành viên này khỏi hộ khẩu không?")) return;
+            }
+
+            fetch(`/deleteMember/${memberId}/`, {
+                method: "POST",
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert("Xóa thành công!");
+                    location.reload();
+                } else {
+                    alert("Lỗi khi xóa thành viên");
+                }
+            });
+        }
+
+        function viewHousehold(householdId) {
+            const modal = document.getElementById('householdDetailModal');
+            if (!modal) {
+                console.error("Modal hiển thị chi tiết hộ khẩu không tồn tại.");
+                return;
+            }
+
+            // ✅ Mở modal ngay lập tức
+            modal.style.display = 'flex';
+
+            const ownerElem = document.getElementById('householdOwnerName');
+            const memberListElem = document.getElementById('householdMemberList');
+
+            if (!ownerElem || !memberListElem) {
+                console.error("Thiếu phần tử trong modal.");
+                return;
+            }
+
+            fetch(`/household/${householdId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    ownerElem.innerText = "Chủ hộ: " + data.owner.name;
+
+                    let html = "";
+                    data.members.forEach(member => {
+                        html += `<tr>
+                            <td>${member.name}</td>
+                            <td>${member.is_owner ? "Chủ hộ" : "Thành viên"}</td>
+                            <td><button onclick="deleteMember('${member.id}', ${member.is_owner ? 'true' : 'false'})">Xóa</button></td>
+                        </tr>`;
+                    });
+
+                    memberListElem.innerHTML = html;
+                })
+                .catch(error => {
+                    console.error("Lỗi khi lấy dữ liệu:", error);
+                    alert("Không thể tải thông tin hộ khẩu.");
+                    modal.style.display = 'none'; // Ẩn nếu có lỗi
+                });
+        }
+
+        (function () {
+            let chart = null;
+            const colors = [
+                'rgba(102, 126, 234, 0.8)',
+                'rgba(255, 107, 107, 0.8)',
+                'rgba(46, 213, 115, 0.8)',
+                'rgba(255, 183, 77, 0.8)',
+                'rgba(153, 102, 255, 0.8)',
+                'rgba(255, 99, 132, 0.8)',
+                'rgba(75, 192, 192, 0.8)',
+                'rgba(255, 159, 64, 0.8)',
+                'rgba(201, 203, 207, 0.8)'
+            ];
+
+            document.getElementById('stat-type').addEventListener('change', fetchStats);
+            fetchStats(); // auto load
+
+            function showLoading() {
+                document.getElementById('loading-info').classList.add('active');
+                document.getElementById('loading-chart').classList.add('active');
+            }
+
+            function hideLoading() {
+                document.getElementById('loading-info').classList.remove('active');
+                document.getElementById('loading-chart').classList.remove('active');
+            }
+
+            async function fetchStats() {
+                const type = document.getElementById('stat-type').value;
+                showLoading();
+
+                try {
+                    const response = await fetch(`/statistics/?type=${type}`);
+                    if (!response.ok) throw new Error(`Server returned ${response.status}`);
+                    
+                    const data = await response.json();
+                    renderInfo(data);
+                    renderChart(data);
+                } catch (error) {
+                    console.error('❌ Lỗi khi lấy thống kê:', error);
+                    renderInfo({ 'Lỗi dữ liệu': 0 });
+                    renderChart({});
+                } finally {
+                    hideLoading();
+                }
+            }
+
+            function renderInfo(data) {
+                const infoBox = document.getElementById('stat-details');
+                infoBox.innerHTML = '';
+
+                const values = Object.values(data).filter(v => typeof v === 'number');
+                const total = values.reduce((sum, val) => sum + val, 0);
+
+                Object.entries(data).forEach(([key, value]) => {
+                    const li = document.createElement('li');
+                    li.className = 'stat-item';
+
+                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+
+                    li.innerHTML = `
+                        <span class="stat-label">${key}</span>
+                        <span class="stat-value">${value.toLocaleString()} (${percentage}%)</span>
+                    `;
+                    infoBox.appendChild(li);
+                });
+            }
+
+            function renderChart(data) {
+                const ctx = document.getElementById('stat-chart').getContext('2d');
+
+                if (chart) {
+                    chart.destroy();
+                }
+
+                const labels = Object.keys(data);
+                const values = Object.values(data);
+                const type = document.getElementById('stat-type').value;
+
+                let chartType = 'doughnut'; // mặc định
+
+                // Xác định loại biểu đồ phù hợp
+                switch (type) {
+                    case 'gender':
+                    case 'residence':
+                        chartType = 'doughnut';
+                        break;
+                    case 'age':
+                        chartType = 'bar';
+                        break;
+                    case 'joined':
+                        chartType = 'line';
+                        break;
+                }
+
+                chart = new Chart(ctx, {
+                    type: chartType,
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Số lượng',
+                            data: values,
+                            backgroundColor: colors.slice(0, labels.length),
+                            borderColor: '#fff',
+                            borderWidth: 2,
+                            fill: chartType === 'line' ? false : true,
+                            tension: 0.2,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: (chartType === 'bar' || chartType === 'line') ? {
+                            y: {
+                                beginAtZero: true
+                            }
+                        } : {},
+                        plugins: {
+                            legend: {
+                                display: chartType !== 'bar' && chartType !== 'line',
+                                position: 'bottom',
+                                labels: {
+                                    padding: 15,
+                                    font: { size: 11 }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const value = context.raw;
+                                        const percentage = ((value / total) * 100).toFixed(1);
+                                        return chartType === 'bar' || chartType === 'line'
+                                            ? `${context.label}: ${value.toLocaleString()}`
+                                            : `${context.label}: ${value.toLocaleString()} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        },
+                        animation: {
+                            duration: 800
+                        }
+                    }
+                });
+            }
+
+        })();
+        
+        function showModal(content) {
+            const existingModal = document.querySelector('.modal-overlay');
+                if (existingModal)
+                    existingModal.remove();
+                            
+                const modal = document.createElement('div');
+                modal.className = 'modal-overlay';
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <span class="close-modal">&times;</span>
+                        ${content}
+                    </div>
+                `;
+                            
+            document.body.appendChild(modal);
+            
+            modal.querySelector('.close-modal').addEventListener('click', function() {
+                modal.remove();
+            });
+            
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal)
+                    modal.remove();
+            });
+        }
+        
+        function closeModal() {
+            const modals = document.querySelectorAll('.modal-overlay');
+            modals.forEach(modal => modal.remove());
+        }
+        function closeModal1() {
+            const modal = document.getElementById('householdDetailModal');
+            if (modal) {
+                modal.style.display = 'none';
+                // Optionally clear content:
+                document.getElementById('householdOwnerName').innerText = "Chủ hộ: ...";
+                document.getElementById('householdMemberList').innerHTML = "";
+            }
+        }
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape')
+                closeModal();
+        });
+
+        function approveRequest(requestId) {
+            if (confirm('Bạn có chắc chắn muốn duyệt yêu cầu này?')) {
+                const button = document.querySelector(`button[onclick="approveRequest('${requestId}')"]`);
+                const originalText = button.innerHTML;
+                button.innerHTML = 'Đang xử lý...';
+                button.disabled = true;
+
+                fetch('/approve-request/' + requestId + '/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken(),
+                    },
+                    body: JSON.stringify({
+                        'action': 'approve'
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Yêu cầu đã được duyệt thành công!');
+                        
+                        const row = button.closest('tr');
+                        row.style.transition = 'opacity 0.3s';
+                        row.style.opacity = '0';
+                        setTimeout(() => {
+                            row.remove();
+                            updatePendingCount();
+                        }, 300);
+                        
+                    } else {
+                        alert(data.message || 'Có lỗi xảy ra khi duyệt yêu cầu!');
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Có lỗi xảy ra khi kết nối đến server!');
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                });
+            }
+        }
+    
+        function rejectRequest(requestId) {
+            if (confirm('Bạn có chắc chắn muốn từ chối yêu cầu này?')) {
+                const button = document.querySelector(`button[onclick="rejectRequest('${requestId}')"]`);
+                const originalText = button.innerHTML;
+                button.innerHTML = 'Đang xử lý...';
+                button.disabled = true;
+
+                fetch('/reject-request/' + requestId + '/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken(),
+                    },
+                    body: JSON.stringify({
+                        'action': 'reject'
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Yêu cầu đã được từ chối thành công!');
+                        
+                        const row = button.closest('tr');
+                        row.style.transition = 'opacity 0.3s';
+                        row.style.opacity = '0';
+                        setTimeout(() => {
+                            row.remove();
+                            updatePendingCount();
+                        }, 300);
+                        
+                    } else {
+                        alert(data.message || 'Có lỗi xảy ra khi từ chối yêu cầu!');
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Có lỗi xảy ra khi kết nối đến server!');
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                });
+            }
+        }
+
+        function getSelectedRequestIds() {
+            const selectedIds = [];
+            const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+            
+            checkedBoxes.forEach(checkbox => {
+                const row = checkbox.closest('tr');
+                const approveBtn = row.querySelector('button[onclick*="approveRequest"]');
+                if (approveBtn) {
+                    const onclick = approveBtn.getAttribute('onclick');
+                    const match = onclick.match(/approveRequest\('([^']+)'\)/);
+                    if (match)
+                        selectedIds.push(match[1]);
+                }
+            });
+            return selectedIds;
+        }
+
+        function clearAllSelections() {
+            const selectAll = document.getElementById('selectAll');
+            const checkboxes = document.querySelectorAll('.row-checkbox');
+            
+            selectAll.checked = false;
+            selectAll.indeterminate = false;
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            
+            updateBulkActions();
+        }
+
+        async function bulkApproveRequests() {
+            const selectedIds = getSelectedRequestIds();
+            
+            if (selectedIds.length === 0) {
+                alert('Vui lòng chọn ít nhất một yêu cầu để duyệt.');
+                return;
+            }
+            
+            const confirmMessage = `Bạn có chắc chắn muốn duyệt ${selectedIds.length} yêu cầu đã chọn?`;
+            if (!confirm(confirmMessage)) return;
+
+            const bulkApproveBtn = document.getElementById('bulkApproveBtn');
+            const originalText = bulkApproveBtn.innerHTML;
+            bulkApproveBtn.innerHTML = 'Đang xử lý...';
+            bulkApproveBtn.disabled = true;
+            
+            try {
+                const results = [];
+                for (const requestId of selectedIds) {
+                    try {
+                        const response = await fetch('/approve-request/' + requestId + '/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': getCsrfToken(),
+                            },
+                            body: JSON.stringify({
+                                'action': 'approve'
+                            })
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                        
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            results.push({ id: requestId, success: true });
+                            
+                            const button = document.querySelector(`button[onclick="approveRequest('${requestId}')"]`);
+                            if (button) {
+                                const row = button.closest('tr');
+                                if (row) {
+                                    row.remove();
+                                }
+                            }
+                        } else {
+                            results.push({
+                                id: requestId,
+                                success: false,
+                                error: data.message || 'Server trả về thất bại' 
+                            });
+                        }
+                    } catch (error) {
+                        console.error(`Error approving request ${requestId}:`, error);
+                        results.push({
+                            id: requestId,
+                            success: false,
+                            error: error.message
+                        });
+                    }
+                }
+                
+                updatePendingCount();
+                updateBulkActions();
+                
+                const successful = results.filter(r => r.success);
+                const failed = results.filter(r => !r.success);
+                
+                if (successful.length > 0 && failed.length === 0) {
+                    alert(`Đã duyệt thành công ${successful.length} yêu cầu.`);
+                } else if (successful.length > 0 && failed.length > 0) {
+                    alert(`Đã duyệt thành công ${successful.length} yêu cầu. ${failed.length} yêu cầu thất bại.`);
+                    console.error('Failed requests:', failed);
+                } else {
+                    alert(`Không thể duyệt ${failed.length} yêu cầu. Vui lòng kiểm tra console để xem chi tiết.`);
+                    console.error('All requests failed:', failed);
+                }
+                
+            } catch (error) {
+                console.error('Bulk approve error:', error);
+                alert('Có lỗi xảy ra khi duyệt yêu cầu: ' + error.message);
+            } finally {
+                bulkApproveBtn.innerHTML = originalText;
+                bulkApproveBtn.disabled = false;
+                clearAllSelections();
+            }
+        }
+
+        async function bulkRejectRequests() {
+            const selectedIds = getSelectedRequestIds();
+            
+            if (selectedIds.length === 0) {
+                alert('Vui lòng chọn ít nhất một yêu cầu để từ chối.');
+                return;
+            }
+            
+            const confirmMessage = `Bạn có chắc chắn muốn từ chối ${selectedIds.length} yêu cầu đã chọn?`;
+            if (!confirm(confirmMessage)) return;
+            
+            const bulkRejectBtn = document.getElementById('bulkRejectBtn');
+            const originalText = bulkRejectBtn.innerHTML;
+            bulkRejectBtn.innerHTML = 'Đang xử lý...';
+            bulkRejectBtn.disabled = true;
+            
+            try {
+                const results = [];
+                for (const requestId of selectedIds) {
+                    try {
+                        const response = await fetch('/reject-request/' + requestId + '/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': getCsrfToken(),
+                            },
+                            body: JSON.stringify({
+                                'action': 'reject'
+                            })
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                        
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            results.push({ id: requestId, success: true });
+                            const button = document.querySelector(`button[onclick="rejectRequest('${requestId}')"]`);
+                            if (button) {
+                                const row = button.closest('tr');
+                                if (row) {
+                                    row.remove();
+                                }
+                            }
+                        } else {
+                            results.push({
+                                id: requestId,
+                                success: false,
+                                error: data.message || 'Server trả về thất bại'
+                            });
+                        }
+                    } catch (error) {
+                        console.error(`Error rejecting request ${requestId}:`, error);
+                        results.push({
+                            id: requestId,
+                            success: false,
+                            error: error.message
+                        });
+                    }
+                }
+                
+                updatePendingCount();
+                updateBulkActions();
+                
+                const successful = results.filter(r => r.success);
+                const failed = results.filter(r => !r.success);
+                
+                if (successful.length > 0 && failed.length === 0) {
+                    alert(`Đã từ chối thành công ${successful.length} yêu cầu.`);
+                } else if (successful.length > 0 && failed.length > 0) {
+                    alert(`Đã từ chối thành công ${successful.length} yêu cầu. ${failed.length} yêu cầu thất bại.`);
+                    console.error('Failed requests:', failed);
+                } else {
+                    alert(`Không thể từ chối ${failed.length} yêu cầu. Vui lòng kiểm tra console để xem chi tiết.`);
+                    console.error('All requests failed:', failed);
+                }
+                
+            } catch (error) {
+                console.error('Bulk reject error:', error);
+                alert('Có lỗi xảy ra khi từ chối yêu cầu: ' + error.message);
+            } finally {
+                bulkRejectBtn.innerHTML = originalText;
+                bulkRejectBtn.disabled = false;
+                clearAllSelections();
+            }
+        }
+
+        function confirmLogout() {
+            return confirm("Đăng xuất khỏi tài khoản của bạn?");
+        }
+
+        function initializePage() {
+            console.log('Initializing page...'); 
+            updatePendingCount();
+            updateBulkActions()
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+        });
+        
+        if (document.readyState !== 'loading') {
+            initializePage();
+        }
+
+    </script>
+    
+</body>
+</html>
