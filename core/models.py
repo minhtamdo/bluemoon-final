@@ -67,6 +67,27 @@ REQUEST_TYPE_CHOICES = [
 
 # --- MODELS ---
 
+class Activity(models.Model):
+    ACTION_CHOICES = [
+        ('create_household', 'Đăng ký hộ khẩu mới'),
+        ('update_household', 'Cập nhật hộ khẩu'),
+        ('delete_household', 'Xóa hộ khẩu'),
+        ('create_member', 'Đăng ký nhân khẩu mới'),
+        ('update_member', 'Cập nhật nhân khẩu'),
+        ('delete_member', 'Xóa nhân khẩu'),
+        ('approve_request', 'Duyệt yêu cầu'),
+        ('reject_request', 'Từ chối yêu cầu'),
+    ]
+
+    action = models.CharField(max_length=50, choices=ACTION_CHOICES)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    detail = models.TextField()  # Nội dung như: "Đăng ký hộ khẩu mới - Căn A123"
+    status = models.CharField(max_length=20, choices=[
+        ('pending', 'Chờ duyệt'),
+        ('success', 'Đã duyệt'),
+        ('error', 'Từ chối')
+    ], default='success')
+
 class User(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, db_column='user_id')
     username = models.TextField()
@@ -188,24 +209,3 @@ class ResidencyRequest(models.Model):
 
     class Meta:
         db_table = 'residency_requests'
-
-class Activity(models.Model):
-    ACTION_CHOICES = [
-        ('create_household', 'Đăng ký hộ khẩu mới'),
-        ('update_household', 'Cập nhật hộ khẩu'),
-        ('delete_household', 'Xóa hộ khẩu'),
-        ('create_member', 'Đăng ký nhân khẩu mới'),
-        ('update_member', 'Cập nhật nhân khẩu'),
-        ('delete_member', 'Xóa nhân khẩu'),
-        ('approve_request', 'Duyệt yêu cầu'),
-        ('reject_request', 'Từ chối yêu cầu'),
-    ]
-
-    action = models.CharField(max_length=50, choices=ACTION_CHOICES)
-    timestamp = models.DateTimeField(auto_now_add=True)
-    detail = models.TextField()  # Nội dung như: "Đăng ký hộ khẩu mới - Căn A123"
-    status = models.CharField(max_length=20, choices=[
-        ('pending', 'Chờ duyệt'),
-        ('success', 'Đã duyệt'),
-        ('error', 'Từ chối')
-    ], default='success')
