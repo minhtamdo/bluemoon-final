@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Nhập Hệ Thống</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .content {
+            padding: 40px 30px;
+        }
+
+        /* Role Selection Page */
+        .role-selection {
+            display: block;
+        }
+
+        .role-selection.hidden {
+            display: none;
+        }
+
+        .role-card {
+            background: #f8f9ff;
+            border: 2px solid #e1e5f7;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .role-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-color: #4facfe;
+        }
+
+        .role-card.selected {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border-color: #4facfe;
+        }
+
+        .role-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .role-card:hover::before {
+            left: 100%;
+        }
+
+        .role-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .role-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .role-desc {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .role-card.selected .role-desc {
+            opacity: 0.9;
+        }
+
+        /* Login Form */
+        .login-form {
+            display: none;
+        }
+
+        .login-form.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5f7;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f9ff;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+            background: white;
+        }
+
+        .selected-role {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(79, 172, 254, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #f8f9ff;
+            color: #666;
+            border: 2px solid #e1e5f7;
+        }
+
+        .btn-secondary:hover {
+            background: #e1e5f7;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .slide-left {
+            animation: slideLeft 0.5s ease-in-out;
+        }
+
+        @keyframes slideLeft {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏢 Hệ Thống Quản Lý</h1>
+            <p>Vui lòng chọn vai trò để đăng nhập</p>
+        </div>
+
+        <div class="content">
+            <!-- Role Selection -->
+            <div class="role-selection" id="roleSelection">
+                <div class="role-card" data-role="accountant">
+                    <span class="role-icon">💼</span>
+                    <div class="role-title">Kế Toán</div>
+                    <div class="role-desc">Quản lý tài chính và kế toán</div>
+                </div>
+
+                <div class="role-card" data-role="leader">
+                    <span class="role-icon">👥</span>
+                    <div class="role-title">Tổ Trưởng / Tổ Phó</div>
+                    <div class="role-desc">Quản lý và điều hành tổ</div>
+                </div>
+
+                <div class="role-card" data-role="resident">
+                    <span class="role-icon">🏠</span>
+                    <div class="role-title">Cư Dân</div>
+                    <div class="role-desc">Tra cứu thông tin cá nhân</div>
+                </div>
+
+                <button class="btn btn-primary" id="continueBtn" disabled>
+                    Tiếp Tục →
+                </button>
+            </div>
+
+            <!-- Login Form -->
+            <div class="login-form" id="loginForm">
+                <div class="selected-role" id="selectedRoleDisplay"></div>
+
+                <form id="loginFormElement">
+                    <div class="form-group">
+                        <label for="username">Tên đăng nhập</label>
+                        <input type="text" id="username" class="form-input" placeholder="Nhập tên đăng nhập" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Mật khẩu</label>
+                        <input type="password" id="password" class="form-input" placeholder="Nhập mật khẩu" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        🔐 Đăng Nhập
+                    </button>
+
+                    <button type="button" class="btn btn-secondary" id="backBtn">
+                        ← Quay Lại
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedRole = null;
+        const roleCards = document.querySelectorAll('.role-card');
+        const continueBtn = document.getElementById('continueBtn');
+        const roleSelection = document.getElementById('roleSelection');
+        const loginForm = document.getElementById('loginForm');
+        const selectedRoleDisplay = document.getElementById('selectedRoleDisplay');
+        const backBtn = document.getElementById('backBtn');
+        const loginFormElement = document.getElementById('loginFormElement');
+
+        const roleLabels = {
+            'accountant': 'Kế Toán 💼',
+            'leader': 'Tổ Trưởng / Tổ Phó 👥',
+            'resident': 'Cư Dân 🏠'
+        };
+
+        // Handle role selection
+        roleCards.forEach(card => {
+            card.addEventListener('click', () => {
+                // Remove selected class from all cards
+                roleCards.forEach(c => c.classList.remove('selected'));
+                
+                // Add selected class to clicked card
+                card.classList.add('selected');
+                
+                // Store selected role
+                selectedRole = card.dataset.role;
+                
+                // Enable continue button
+                continueBtn.disabled = false;
+            });
+        });
+
+        // Handle continue button
+        continueBtn.addEventListener('click', () => {
+            if (selectedRole) {
+                // Hide role selection
+                roleSelection.classList.add('hidden');
+                
+                // Show login form
+                loginForm.classList.add('active', 'slide-left');
+                
+                // Update selected role display
+                selectedRoleDisplay.textContent = `Đăng nhập với vai trò: ${roleLabels[selectedRole]}`;
+                
+                // Update header
+                document.querySelector('.header p').textContent = 'Nhập thông tin đăng nhập';
+            }
+        });
+
+        // Handle back button
+        backBtn.addEventListener('click', () => {
+            // Hide login form
+            loginForm.classList.remove('active', 'slide-left');
+            
+            // Show role selection
+            roleSelection.classList.remove('hidden');
+            
+            // Reset header
+            document.querySelector('.header p').textContent = 'Vui lòng chọn vai trò để đăng nhập';
+        });
+
+        // Handle form submission
+        loginFormElement.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    
+    if (username && password) {
+        const submitBtn = loginFormElement.querySelector('button[type="submit"]');
+        submitBtn.innerHTML = '🔄 Đang đăng nhập...';
+        submitBtn.disabled = true;
+
+        fetch('/login/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')  // nếu đang dùng CSRF token
+            },
+            body: JSON.stringify({ username, password, role: selectedRole })
+        })
+        .then(response => response.json())
+        .then(data => {
+    if (data.success) {
+        alert(`✅ Đăng nhập thành công! Xin chào bạn.`);
+        // Chuyển hướng trang về URL backend trả về
+        window.location.href = data.redirect_url;
+    } else {
+        alert(`❌ Đăng nhập thất bại: ${data.message}`);
+    }
+})
+
+        .catch(error => {
+            console.error('Lỗi khi gửi yêu cầu đăng nhập:', error);
+            alert('⚠️ Có lỗi xảy ra. Vui lòng thử lại.');
+        })
+        .finally(() => {
+            submitBtn.innerHTML = '🔐 Đăng Nhập';
+            submitBtn.disabled = false;
+        });
+    }
+});
+
+
+        // Add enter key support for role selection
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && selectedRole && !continueBtn.disabled) {
+                continueBtn.click();
+            }
+        });
+
+        function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Kiểm tra tên cookie
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+    </script>
+</body>
+</html>
